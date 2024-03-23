@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/user.request';
 import { Auth, GetAuthUser } from '../auth/decorators/auth.decorator';
@@ -34,5 +34,11 @@ export class UserController {
   @Get('account/:accountNumber')
   async getUserByAccount(@Param() input: any) {
     return await this.userService.getUserByAccount(input);
+  }
+
+  @Put('change-pin')
+  @Auth()
+  async changePin(@GetAuthUser() user: IAuthUser, @Body() input: any) {
+    return await this.userService.changePin(user.id, input);
   }
 }

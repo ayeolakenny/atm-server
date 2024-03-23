@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import * as argon2 from 'argon2';
 import { PrismaService } from 'prisma.service';
 import { generateRandomNumber } from 'src/utils/generatePin';
@@ -130,5 +130,26 @@ export class UserService {
         account.user.name,
       ),
     });
+  }
+
+  async changePin(userId: string, input: any) {
+    const { oldPin, newPin } = input;
+
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (await argon2.verify(user.pin, oldPin)) {
+      await this.prisma.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          pin: await argon2.hash(newPin),
+        },
+      });
+    } else throw new BadRequestException('Invalid pin');
   }
 }
